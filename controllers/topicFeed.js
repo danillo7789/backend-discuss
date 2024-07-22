@@ -1,10 +1,7 @@
 const Room = require('../models/room.js');
-const Topic = require('../models/topic.js');
 
-exports.topicFeed = async (req, res, next) => {
+exports.topicFeed = async (req, res) => {
     try {
-        const uniqueTopicNames = await Topic.distinct('name'); // to avoid duplicates
-        const uniqueTopicsCount = uniqueTopicNames.length;
         const topicsObject = await Room.aggregate([
             {
                 $group: {
@@ -27,7 +24,7 @@ exports.topicFeed = async (req, res, next) => {
                 $project: {
                     _id: 0,
                     topic: '$topicDetails.name',
-                    count: 1
+                    count: 1 //this is the output
                 }
             },
             {
@@ -36,9 +33,9 @@ exports.topicFeed = async (req, res, next) => {
         ]);
 
         if (!topicsObject) {
-            res.status(404);
-            throw new Error('No topics found');
+            return res.status(404).json({ message: 'No topics found' });
         }
+        const uniqueTopicsCount = topicsObject.length
 
         return res.status(200).json({
             uniqueTopicsCount,
@@ -46,7 +43,6 @@ exports.topicFeed = async (req, res, next) => {
         })
     } catch (error) {
         console.log('Error occurred in topicComp', error);
-        res.status(500);
-        return next(new Error('Error occurred in topicComp.'));
+        return res.status(500).json({ message: 'Error occurred in topicComp.' });
     }
 }

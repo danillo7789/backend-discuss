@@ -44,15 +44,26 @@ app.use('/api/get', require('./routes/get/topicFeed.js'));
 app.use('/api/get', require('./routes/get/roomFeed.js'));
 app.use('/api/get', require('./routes/get/room.js'));
 app.use('/api/get', require('./routes/get/getChats.js'));
+app.use('/api/get', require('./routes/get/getUser.js'));
 
 //postroutes
-app.use('/api', require('./routes/post/postChat.js'));
-app.use('/api', require('./routes/post/createRoom.js'));
-app.use('/api', require('./routes/post/deleteRoom.js'));
+app.use('/api', require('./routes/send/postChat.js'));
+app.use('/api', require('./routes/send/createRoom.js'));
+app.use('/api', require('./routes/send/deleteRoom.js'));
+app.use('/api', require('./routes/send/deleteChat.js'));
+app.use('/api', require('./routes/send/updateRoom.js'));
+app.use('/api', require('./routes/send/profileUpdate.js'));
 
 
 // error handler
-app.use(errorHandler);
+// app.use(errorHandler);
+
+// Set timeout
+app.use((req, res, next) => {
+    req.setTimeout(60000); // 1 minute
+    res.setTimeout(60000); // 1 minute
+    next();
+});
 
 //port
 const port = process.env.PORT || 5000;
