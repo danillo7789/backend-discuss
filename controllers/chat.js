@@ -1,6 +1,5 @@
 const Room = require('../models/room.js');
 const Chat = require('../models/chat.js');
-const { populate } = require('dotenv');
 
 exports.postChat = async (req, res) => {
     try {

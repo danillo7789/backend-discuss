@@ -9,7 +9,7 @@ const validateToken = async (req, res, next) => {
       jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
           if (err.name === 'TokenExpiredError') {
-            return res.status(401).json({ message: 'Token expired' });
+            return res.status(401).json({ message: 'Token expired, please login' });
           } else {
             console.log(err)
             return res.status(401).json({ message: 'Failed to authenticate token' });
@@ -22,7 +22,7 @@ const validateToken = async (req, res, next) => {
       return res.status(401).json({ message: 'Token is missing or invalid' });
     }
   } catch (error) {
-    return res.status(401).json({ message: 'User not authorized or token expired' });
+    return res.status(401).json({ message: 'User not authorized' });
   }
 };
 

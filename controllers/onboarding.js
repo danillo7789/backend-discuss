@@ -1,5 +1,4 @@
 const User = require('../models/user.js');
-const cloudinary = require('../utils/cloudinary.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
@@ -65,7 +64,6 @@ exports.loginUser = async (req, res) => {
                 id: user.id,
                 email: user.email,
                 username: user.username,
-                imgUrl: user.profilePicture.url || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
             }
             console.log(user.profilePicture.url);
             const token = jwt.sign({user: currentUser},
