@@ -65,7 +65,7 @@ exports.loginUser = async (req, res) => {
                 email: user.email,
                 username: user.username,
             }
-            console.log(user.profilePicture.url);
+            
             const token = jwt.sign({user: currentUser},
                 process.env.ACCESS_TOKEN_SECRET,
                 { expiresIn: '12h' }

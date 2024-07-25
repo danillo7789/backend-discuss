@@ -60,8 +60,8 @@ app.use('/api', require('./routes/send/profileUpdate.js'));
 
 // Set timeout
 app.use((req, res, next) => {
-    req.setTimeout(60000); // 1 minute
-    res.setTimeout(60000); // 1 minute
+    req.setTimeout(120000); // 2 minutes
+    res.setTimeout(120000); // 2 minutes
     next();
 });
 

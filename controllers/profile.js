@@ -5,7 +5,7 @@ exports.getUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id).lean();
         if (user) {
-            const { password, ...userWithoutPassword } = user; // Destructure to exclude the password field
+            const { password, ...userWithoutPassword } = user; // Destructuring to exclude the password field
             res.status(200).json(userWithoutPassword);
         } else {
             res.status(404).json({ message: 'User not found' });

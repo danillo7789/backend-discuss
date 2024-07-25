@@ -16,7 +16,7 @@ exports.getRoom = async (req, res) => {
 
         const roomWithTotalParticipantCount = {
             ...room,
-            totalParticipants: room.participants.length
+            totalParticipants: room.participants.length 
         }
 
         return res.status(200).json(roomWithTotalParticipantCount);

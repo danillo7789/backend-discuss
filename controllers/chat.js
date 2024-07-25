@@ -62,7 +62,11 @@ exports.AllChats = async (req, res) => {
     try {
         const chats = await Chat.find().populate([
             { path: 'sender', select: '-email -password' },
-            { path: 'room', select: '-topic -participants -chats', populate: { path: 'host', select: '-email -password' } }
+            { path: 'room', select: '-participants -chats', 
+                populate: [
+                    { path: 'host', select: '-email -password' },
+                    { path: 'topic' }
+                ]}
         ]).sort({ createdAt: -1 });
 
         if (!chats) return res.status(404).json({ message: 'No chats found' });
