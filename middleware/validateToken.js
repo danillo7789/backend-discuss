@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const validateToken = async (req, res, next) => {
   try {
     let authHeader = req.headers.Authorization || req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+    if (authHeader && authHeader?.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
       jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
@@ -25,36 +25,5 @@ const validateToken = async (req, res, next) => {
     return res.status(401).json({ message: 'User not authorized' });
   }
 };
-
-// const validateToken = async (req, res, next) => {
-//   try {
-//     let token = req.cookies.token;
-
-//     if (!token) {
-//       return res.status(401).json({ message: 'unAuthenticated, please login' });
-//     }
-
-//     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-//       if (err) {
-//         return res.status(401).json({ message: 'User is not authorized, please login' });
-//       }
-//       else if (decoded.user) {
-//          req.user = decoded.user;
-//       } else {
-//         return res
-//           .status(401)
-//           .json({ message: 'Authentication failed, kindly login' });
-//       }
-//       next();
-//     });
-
-//   } catch (error) {
-//     res.clearCookie('token');
-//     console.log(error);
-//     return res
-//       .status(500)
-//       .json({ message: 'Error occurred while validating the user' });
-//   }
-// };
 
 module.exports = { validateToken };

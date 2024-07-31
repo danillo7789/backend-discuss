@@ -20,8 +20,11 @@ app.use(cors({
     credentials: true,
     origin: ['http://localhost:5173', 'https://diskors.netlify.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+    allowedHeaders: ['Content-Type', 'Authorization']
 }))
+
+//cookie parser
+app.use(cookieParser());
 
 //body parser
 app.use(express.json());
@@ -30,14 +33,11 @@ app.use(express.urlencoded({ extended: true }));
 
 //session
 
-//cookie parser
-app.use(cookieParser());
-
 //cron job
 
 
 //routes
-app.use('/api/user', require('./routes/onboarding/onboarding.js'));
+app.use('/api/user', require('./routes/auth/auth.js'));
 
 //get routes
 app.use('/api/get', require('./routes/get/topicFeed.js'));
