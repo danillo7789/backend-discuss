@@ -83,7 +83,7 @@ exports.loginUser = async (req, res) => {
         httpOnly: true, //accessible only by web server
         secure: isDevelopment ? false : true, // https
         sameSite: isDevelopment ? 'Lax' : 'None', // backend and frontend might be on diff servers
-        maxAge: 7 * 24 * 60 * 60 * 1000 
+        maxAge: 7 * 24 * 60 * 60 * 1000
       })
 
       // const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -142,7 +142,7 @@ exports.logout = async (req, res) => {
     if (!cookies?.jwt) return res.sendStatus(204);
     res.clearCookie('jwt', {
       httpOnly: true,
-      sameSite: 'None',
+      sameSite: isDevelopment ? 'Lax' : 'None',
       secure: isDevelopment ? false : true
     });
     res.json({ message: 'cookie cleared' });
