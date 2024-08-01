@@ -17,10 +17,10 @@ const app = express();
 
 //cors
 app.use(cors({
-    credentials: true,
     origin: ['http://localhost:5173', 'https://diskors.netlify.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
 }))
 
 //cookie parser

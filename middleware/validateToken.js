@@ -6,12 +6,13 @@ const validateToken = async (req, res, next) => {
     let authHeader = req.headers.Authorization || req.headers.authorization;
     if (authHeader && authHeader?.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
+
       jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
           if (err.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Token expired, please login' });
           } else {
-            console.log(err)
+            console.log('validdate token err', err)
             return res.status(401).json({ message: 'Failed to authenticate token' });
           }
         }

@@ -63,14 +63,13 @@ exports.loginUser = async (req, res) => {
     if (user && isMatch) {
       const currentUser = {
           id: user.id,
-          email: user.email,
           username: user.username,
       }
       
       const token = jwt.sign(
         { user: currentUser },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '10m' }
+        { expiresIn: '1m' }
       );
 
       const refreshToken = jwt.sign(
@@ -78,15 +77,16 @@ exports.loginUser = async (req, res) => {
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: '7d' }
       )
-      //creating secure cookie with refresh token
+
       res.cookie('jwt', refreshToken, {
-        httpOnly: true, //accessible only by web server
+        httpOnly: true, //not accessible by clientside js
         secure: isDevelopment ? false : true, // https
-        sameSite: isDevelopment ? 'Lax' : 'None', // backend and frontend might be on diff servers
+        sameSite: isDevelopment ? 'Lax' : 'none',
+        path: '/',
         maxAge: 7 * 24 * 60 * 60 * 1000
+        // domain: isDevelopment ? 'localhost' : 'diskors.netlify.app'
       })
 
-      // const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       return res.status(200).json({ token })
     } else {
       return res.status(401).json({ message: 'Invalid login credentials' });
@@ -104,9 +104,10 @@ exports.loginUser = async (req, res) => {
 exports.refresh = async (req, res) => {
   try {
     const cookies = req.cookies;
-    if (!cookies?.jwt) return res.status(401).json({ message: 'unauthorized' });
+    console.log('cookies refresh endpoint', cookies)
+    if (!cookies?.jwt) return res.status(401).json({ message: 'Unauthorized' });
 
-    const refreshToken = cookies.jwt;
+    const refreshToken = cookies?.jwt;
 
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
       if (err) return res.status(403).json({ message: 'Forbidden' });
@@ -117,7 +118,6 @@ exports.refresh = async (req, res) => {
 
       const currentUser = {
         id: foundUser.id,
-        email: foundUser.email,
         username: foundUser.username,
       }
 
@@ -125,8 +125,23 @@ exports.refresh = async (req, res) => {
       const newToken = jwt.sign(
         { user: currentUser },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '10m' }
+        { expiresIn: '1m' }
       )
+
+      //new refreshToken as it will be stored in localstorage recomended by auth0
+      const newRefreshToken = jwt.sign(
+        { userId: foundUser.id },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: '7d' }
+      )
+
+      res.cookie('jwt', newRefreshToken, {
+        httpOnly: true,
+        secure: isDevelopment ? false : true, // https
+        sameSite: isDevelopment ? 'Lax' : 'none',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      })
 
       res.status(200).json({ token: newToken });
     })
