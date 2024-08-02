@@ -69,7 +69,7 @@ exports.loginUser = async (req, res) => {
       const token = jwt.sign(
         { user: currentUser },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '1m' }
+        { expiresIn: '15m' }
       );
 
       const refreshToken = jwt.sign(
@@ -84,7 +84,6 @@ exports.loginUser = async (req, res) => {
         sameSite: isDevelopment ? 'Lax' : 'none',
         path: '/',
         maxAge: 7 * 24 * 60 * 60 * 1000
-        // domain: isDevelopment ? 'localhost' : 'diskors.netlify.app'
       })
 
       return res.status(200).json({ token })
@@ -125,10 +124,9 @@ exports.refresh = async (req, res) => {
       const newToken = jwt.sign(
         { user: currentUser },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '1m' }
+        { expiresIn: '15m' }
       )
 
-      //new refreshToken as it will be stored in localstorage recomended by auth0
       const newRefreshToken = jwt.sign(
         { userId: foundUser.id },
         process.env.REFRESH_TOKEN_SECRET,
@@ -157,7 +155,7 @@ exports.logout = async (req, res) => {
     if (!cookies?.jwt) return res.sendStatus(204);
     res.clearCookie('jwt', {
       httpOnly: true,
-      sameSite: isDevelopment ? 'Lax' : 'None',
+      sameSite: isDevelopment ? 'Lax' : 'none',
       secure: isDevelopment ? false : true
     });
     res.json({ message: 'cookie cleared' });
