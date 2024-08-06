@@ -30,6 +30,10 @@ exports.profileUpdate = async (req, res) => {
             return res.status(404).json({ message: 'User not found!' });
         }
 
+        if(!req.file && !email) {
+            return res.status(403).json({ message: 'Nothing to update' });
+        }
+
         if (req.file) {
             try {
                 const result = await cloudinary.uploader.upload(req.file.path, { resource_type: 'auto' });
@@ -50,7 +54,7 @@ exports.profileUpdate = async (req, res) => {
         await user.save();
         return res.status(200).json(user);
     } catch (error) {
-        if (error.name === 'MongoNetworkError' || error.code === 'ETIMEOUT') {
+        if (error.name === 'MongoNetworkError' || error.name === 'MongooseServerSelectionError' || error.code === 'ETIMEOUT') {
             return res.status(503).json({ message: 'Service Unavailable. Please check your internet connection and try again.' });
         } else {
             console.error('There was an error updating the user:', error);

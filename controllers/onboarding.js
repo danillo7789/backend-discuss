@@ -103,7 +103,6 @@ exports.loginUser = async (req, res) => {
 exports.refresh = async (req, res) => {
   try {
     const cookies = req.cookies;
-    console.log('cookies refresh endpoint', cookies)
     if (!cookies?.jwt) return res.status(401).json({ message: 'Unauthorized' });
 
     const refreshToken = cookies?.jwt;
@@ -113,7 +112,7 @@ exports.refresh = async (req, res) => {
 
       const foundUser = await User.findOne({ _id: decoded.userId });
       
-      if (!foundUser) return res.status(401).json({ message: 'unAauthorized' });
+      if (!foundUser) return res.status(401).json({ message: 'unAuthorized' });
 
       const currentUser = {
         id: foundUser.id,

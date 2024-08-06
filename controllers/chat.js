@@ -102,7 +102,7 @@ exports.deleteChat = async (req, res) => {
         }
         await room.save();
 
-        return res.status(200).json({ message: 'Chat deleted successfully' });
+        return res.status(200).json({ message: 'Chat deleted successfully', deleted: {_id: chatId} });
     } catch (error) {
         console.log('Error occurred deleting chat', error);
         return res.status(500).json({ message: 'Error occurred deleting chat' });

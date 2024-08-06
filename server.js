@@ -1,27 +1,84 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const cookieParser = require('cookie-parser')
-const cors = require('cors')
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const dbConnect = require('./config/dbConnect.js');
 // const { errorHandler } = require('./middleware/errorHandler.js');
+const User = require('./models/user.js');
 
-
-//load env
-dotenv.config();
-
-//connect db
-dbConnect();
-
-//create express app
+// Create Express app
 const app = express();
 
-//cors
-app.use(cors({
+// For Socket.IO
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require('socket.io');
+const io = new Server(server, {
+  cors: {
     origin: ['http://localhost:5173', 'https://diskors.netlify.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
-}))
+  },
+});
+
+// Load environment variables
+dotenv.config();
+
+// Connect to the database
+dbConnect();
+
+// Set up CORS middleware
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://diskors.netlify.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+
+
+// Set up Socket.IO
+io.on('connection', (socket) => {
+    console.log('New client connected');
+    
+    socket.on('join_room', (roomId) => {
+      socket.join(roomId);
+      console.log('Joined room:', roomId);
+    });
+  
+    socket.on('send_message', async (data) => {
+    try {
+        // Assuming data.sender is an ObjectId, fetch the complete sender details from the database
+        const sender = await User.findById(data.sender).select('_id username profilePicture');
+
+        if (!sender) {
+        throw new Error('Sender not found');
+        }
+
+        const message = {
+        _id: data._id,
+        sender: sender,  // Use the complete sender details fetched from the database
+        text: data.text,
+        createdAt: data.createdAt,
+        };
+
+        console.log(`Message sent to room: ${data.roomId}`, message);
+        io.to(data.roomId).emit('receive_message', message);
+    } catch (error) {
+        console.error('Error fetching sender details:', error);
+    }
+    });
+  
+    socket.on('delete_message', (data) => {
+      io.to(data.roomId).emit('delete_message', data);
+      console.log(`Message ${data.chatId} deleted in room:`, data.roomId);
+    });
+  
+    socket.on('disconnect', () => {
+      console.log('Client disconnected');
+    });
+});
+
 
 //cookie parser
 app.use(cookieParser());
@@ -30,11 +87,9 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 //session
 
 //cron job
-
 
 //routes
 app.use('/api/user', require('./routes/auth/auth.js'));
@@ -54,21 +109,14 @@ app.use('/api', require('./routes/send/deleteChat.js'));
 app.use('/api', require('./routes/send/updateRoom.js'));
 app.use('/api', require('./routes/send/profileUpdate.js'));
 
-
 // error handler
 // app.use(errorHandler);
 
-// Set timeout
-app.use((req, res, next) => {
-    req.setTimeout(120000); // 2 minutes
-    res.setTimeout(120000); // 2 minutes
-    next();
-});
 
 //port
 const port = process.env.PORT || 5000;
 
 //start server
-app.listen(port, ()=> {
+server.listen(port, ()=> {
     console.log(`Server started on port ${port}`)
 });
