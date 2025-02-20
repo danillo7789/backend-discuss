@@ -23,7 +23,7 @@ exports.getUser = async (req, res) => {
 
 exports.profileUpdate = async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email, about } = req.body;
         const user = await User.findById(req.params.id);
 
         if (!user) {
@@ -47,9 +47,9 @@ exports.profileUpdate = async (req, res) => {
             }
         }
 
-        if (email) {
-            user.email = email;
-        }
+        if (email) user.email = email;
+
+        if (about) user.about = about;
 
         await user.save();
         return res.status(200).json(user);

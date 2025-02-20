@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get('/room-feed', validateToken, roomFeed);
 //unAuth roomfeed
-router.get('/un-auth/room-feed', roomFeed);
+// router.get('/un-auth/room-feed', roomFeed);
 
 module.exports = router;

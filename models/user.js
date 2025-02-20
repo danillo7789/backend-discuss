@@ -22,6 +22,10 @@ const userSchema = mongoose.Schema({
         required: true,
         unique: true,
     },
+    about: {
+        type: String,
+        default: ''
+    },
     profilePicture: {
         url: {
             type: String

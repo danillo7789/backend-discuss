@@ -1,4 +1,5 @@
 const Room = require('../models/room.js');
+const Users = require('../models/user.js');
 
 exports.roomFeed = async (req, res) => {
   try {
@@ -12,7 +13,7 @@ exports.roomFeed = async (req, res) => {
     const roomsWithParticipantCount = rooms.map(room => ({
       ...room,
       participantsCount: room.participants.length
-    }));
+    }));  
 
     return res.status(200).json(roomsWithParticipantCount);
   } catch (error) {
@@ -20,4 +21,3 @@ exports.roomFeed = async (req, res) => {
     return res.status(500).json({ message: 'Error occurred while fetching rooms' });
   }
 };
-  

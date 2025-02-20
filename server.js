@@ -9,32 +9,27 @@ const User = require('./models/user.js');
 // Create Express app
 const app = express();
 
+// Load environment variables
+dotenv.config();
+
+const corsObject = {
+  origin: [process.env.LOCAL, process.env.LIVE],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}
+
 // For Socket.IO
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
-const io = new Server(server, {
-  cors: {
-    origin: ['http://localhost:5173', 'https://diskors.netlify.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  },
-});
-
-// Load environment variables
-dotenv.config();
+const io = new Server(server, { cors: corsObject });
 
 // Connect to the database
 dbConnect();
 
 // Set up CORS middleware
-app.use(cors({
-  origin: ['http://localhost:5173', 'https://diskors.netlify.app'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
+app.use(cors(corsObject));
 
 
 // Set up Socket.IO
@@ -52,7 +47,7 @@ io.on('connection', (socket) => {
         const sender = await User.findById(data.sender).select('_id username profilePicture');
 
         if (!sender) {
-        throw new Error('Sender not found');
+          throw new Error('Sender not found');
         }
 
         const message = {
@@ -62,7 +57,7 @@ io.on('connection', (socket) => {
         createdAt: data.createdAt,
         };
 
-        console.log(`Message sent to room: ${data.roomId}`, message);
+        // console.log(`Message sent to room: ${data.roomId}`, message);
         io.to(data.roomId).emit('receive_message', message);
     } catch (error) {
         console.error('Error fetching sender details:', error);

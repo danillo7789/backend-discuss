@@ -86,6 +86,14 @@ exports.loginUser = async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000
       })
 
+      res.cookie('accesstoken', token, {
+        httpOnly: true, //not accessible by clientside js
+        secure: isDevelopment ? false : true, // https
+        sameSite: isDevelopment ? 'Lax' : 'none',
+        path: '/',
+        maxAge: 15 * 60 * 1000
+      })
+
       return res.status(200).json({ token })
     } else {
       return res.status(401).json({ message: 'Invalid login credentials' });
@@ -138,6 +146,14 @@ exports.refresh = async (req, res) => {
         sameSite: isDevelopment ? 'Lax' : 'none',
         path: '/',
         maxAge: 7 * 24 * 60 * 60 * 1000
+      })
+
+      res.cookie('accesstoken', newToken, {
+        httpOnly: true, //not accessible by clientside js
+        secure: isDevelopment ? false : true, // https
+        sameSite: isDevelopment ? 'Lax' : 'none',
+        path: '/',
+        maxAge: 15 * 60 * 1000
       })
 
       res.status(200).json({ token: newToken });
