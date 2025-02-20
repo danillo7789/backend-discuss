@@ -15,7 +15,7 @@ dotenv.config();
 const corsObject = {
   origin: [process.env.LOCAL, process.env.LIVE],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type'],
   credentials: true,
 }
 
@@ -23,7 +23,11 @@ const corsObject = {
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
-const io = new Server(server, { cors: corsObject });
+const io = new Server(server, {
+  cors: corsObject,
+  pingInterval: 25000,
+  pingTimeout: 5000
+});
 
 // Connect to the database
 dbConnect();
@@ -31,14 +35,29 @@ dbConnect();
 // Set up CORS middleware
 app.use(cors(corsObject));
 
+let onlineUsers = new Set();
 
 // Set up Socket.IO
 io.on('connection', (socket) => {
-    console.log('New client connected');
-    
+    console.log('A user connected');
+
+    /*** 🔹 USER ONLINE TRACKING ***/
+    socket.on("userOnline", (userId) => {
+      socket.userId = userId; // Store userId in socket
+      if (!onlineUsers.has(userId)) {
+          onlineUsers.add(userId);
+          io.emit("onlineUsers", Array.from(onlineUsers));
+      }
+    });
+
+    socket.on("userOffline", (userId) => {
+        onlineUsers.delete(userId);
+        io.emit("onlineUsers", Array.from(onlineUsers));
+    });
+
+    /*** 🔹 REAL-TIME CHAT FUNCTIONALITY ***/
     socket.on('join_room', (roomId) => {
-      socket.join(roomId);
-      console.log('Joined room:', roomId);
+      socket.join(roomId);      
     });
   
     socket.on('send_message', async (data) => {
@@ -61,7 +80,7 @@ io.on('connection', (socket) => {
         io.to(data.roomId).emit('receive_message', message);
     } catch (error) {
         console.error('Error fetching sender details:', error);
-    }
+      }
     });
   
     socket.on('delete_message', (data) => {
@@ -69,8 +88,13 @@ io.on('connection', (socket) => {
       console.log(`Message ${data.chatId} deleted in room:`, data.roomId);
     });
   
-    socket.on('disconnect', () => {
-      console.log('Client disconnected');
+    /*** 🔹 HANDLE DISCONNECT ***/
+    socket.on("disconnect", () => {
+      if (socket.userId) {
+          onlineUsers.delete(socket.userId);
+          io.emit("onlineUsers", Array.from(onlineUsers));
+      }
+      console.log("Client disconnected");
     });
 });
 
