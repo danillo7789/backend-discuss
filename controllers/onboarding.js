@@ -121,12 +121,12 @@ exports.logout = async (req, res) => {
     if (!cookies?.jwt) return res.sendStatus(204);
     res.clearCookie('jwt', {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: isDevelopment ? 'lax' : 'none',
       secure: isDevelopment ? false : true
     });
     res.clearCookie('accesstoken', {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: isDevelopment ? 'lax' : 'none',
       secure: isDevelopment ? false : true
     });
     res.json({ message: 'Logged out' });

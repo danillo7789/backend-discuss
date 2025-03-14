@@ -21,7 +21,7 @@ const setTokens = (res, token, refreshToken) => {
   res.cookie('accesstoken', token, {
     httpOnly: true, //not accessible by clientside js
     secure: isDevelopment ? false : true, // https
-    sameSite: 'lax',
+    sameSite: isDevelopment ? 'lax' : 'none',
     path: '/',
     maxAge: 15 * 60 * 1000,
   });
@@ -29,7 +29,7 @@ const setTokens = (res, token, refreshToken) => {
   res.cookie('jwt', refreshToken, {
     httpOnly: true, //not accessible by clientside js
     secure: isDevelopment ? false : true, // https
-    sameSite: 'lax',
+    sameSite: isDevelopment ? 'lax' : 'none',
     path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
