@@ -4,6 +4,7 @@ const { profileUpdate } = require('../../controllers/profile');
 const router = express.Router();
 const multer = require('multer');
 const { upload } = require('../../middleware/multer');
+const { defaultLimiter } = require('../../middleware/rateLimiter');
 
 router.use((err, req, res, next) => {
   if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
@@ -12,6 +13,6 @@ router.use((err, req, res, next) => {
   next(err);
 });
 
-router.put('/user-update/:id', validateToken, upload.single('profilePicture'), profileUpdate);
+router.put('/user-update/:id', validateToken, defaultLimiter, upload.single('profilePicture'), profileUpdate);
 
 module.exports = router;

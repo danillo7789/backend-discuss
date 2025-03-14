@@ -1,6 +1,7 @@
 const User = require('../models/user.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const { generateTokens, setTokens } = require('../utils/tokens.js');
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -65,36 +66,11 @@ exports.loginUser = async (req, res) => {
           id: user.id,
           username: user.username,
       }
-      
-      const token = jwt.sign(
-        { user: currentUser },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '15m' }
-      );
 
-      const refreshToken = jwt.sign(
-        { userId: user.id },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '7d' }
-      )
+      const { accessToken, refreshToken } = generateTokens(currentUser, user.id);
+      setTokens(res, accessToken, refreshToken);
 
-      res.cookie('jwt', refreshToken, {
-        httpOnly: true, //not accessible by clientside js
-        secure: isDevelopment ? false : true, // https
-        sameSite: isDevelopment ? 'Lax' : 'none',
-        path: '/',
-        maxAge: 7 * 24 * 60 * 60 * 1000
-      })
-
-      res.cookie('accesstoken', token, {
-        httpOnly: true, //not accessible by clientside js
-        secure: isDevelopment ? false : true, // https
-        sameSite: isDevelopment ? 'Lax' : 'none',
-        path: '/',
-        maxAge: 15 * 60 * 1000
-      })
-
-      return res.status(200).json({ token })
+      return res.status(200).json({ token: accessToken })
     } else {
       return res.status(401).json({ message: 'Invalid login credentials' });
     }
@@ -127,34 +103,9 @@ exports.refresh = async (req, res) => {
         username: foundUser.username,
       }
 
-      //create new accessToken
-      const newToken = jwt.sign(
-        { user: currentUser },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '15m' }
-      )
-
-      const newRefreshToken = jwt.sign(
-        { userId: foundUser.id },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '7d' }
-      )
-
-      res.cookie('jwt', newRefreshToken, {
-        httpOnly: true,
-        secure: isDevelopment ? false : true, // https
-        sameSite: isDevelopment ? 'Lax' : 'none',
-        path: '/',
-        maxAge: 7 * 24 * 60 * 60 * 1000
-      })
-
-      res.cookie('accesstoken', newToken, {
-        httpOnly: true, //not accessible by clientside js
-        secure: isDevelopment ? false : true, // https
-        sameSite: isDevelopment ? 'Lax' : 'none',
-        path: '/',
-        maxAge: 15 * 60 * 1000
-      })
+      //create new accessToken and refreshToken
+      const { accessToken: newToken, refreshToken: newRefreshToken } = generateTokens(currentUser, foundUser.id);
+      setTokens(res, newToken, newRefreshToken);
 
       res.status(200).json({ token: newToken });
     })
@@ -170,10 +121,15 @@ exports.logout = async (req, res) => {
     if (!cookies?.jwt) return res.sendStatus(204);
     res.clearCookie('jwt', {
       httpOnly: true,
-      sameSite: isDevelopment ? 'Lax' : 'none',
+      sameSite: 'lax',
       secure: isDevelopment ? false : true
     });
-    res.json({ message: 'cookie cleared' });
+    res.clearCookie('accesstoken', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: isDevelopment ? false : true
+    });
+    res.json({ message: 'Logged out' });
     
   } catch (error) {
     console.error('error clearing cookie', error)
