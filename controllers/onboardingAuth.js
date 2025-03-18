@@ -2,6 +2,7 @@ const User = require('../models/user.js');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { generateTokens, setTokens } = require('../utils/tokens.js');
+const { sendMail } = require('../utils/elasticMail.js');
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -63,8 +64,8 @@ exports.loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (user && isMatch) {
       const currentUser = {
-          id: user.id,
-          username: user.username,
+        id: user.id,
+        email: user.email,
       }
 
       const { accessToken, refreshToken } = generateTokens(currentUser, user.id);
@@ -84,6 +85,7 @@ exports.loginUser = async (req, res) => {
   }
 }
 
+
 exports.refresh = async (req, res) => {
   try {
     const cookies = req.cookies;
@@ -100,7 +102,7 @@ exports.refresh = async (req, res) => {
 
       const currentUser = {
         id: foundUser.id,
-        username: foundUser.username,
+        email: foundUser.email,
       }
 
       //create new accessToken and refreshToken
@@ -111,6 +113,53 @@ exports.refresh = async (req, res) => {
     })
   } catch (error) {
     console.error('refresh token error', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'Account does not exist' });
+
+    user.passwordReset();
+    await sendMail(user, email);
+    await user.save();
+    res.status(200).json({ message: 'Password reset link sent to your email'});
+  } catch (error) {
+   console.error('forgot password error', error);
+   res.status(500).json({ message: 'Internal Server Error' }); 
+  }
+}
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { newPassword, confirmNewPassword, resetToken} = req.body;
+    if (!newPassword || !confirmNewPassword) return res.status(400).json({ message: 'All fields are required' });
+    if (newPassword !== confirmNewPassword) return res.status(400).json({ message: 'Passwords do not match' });
+
+    const user = await User.findOne({ passwordResetToken: resetToken });
+    if (!user) return res.status(404).json({ message: 'Invalid Token' });
+
+    const now = Date.now();
+    if (now > user.passwordResetExpires) {
+      user.passwordResetToken = null;
+      user.passwordResetExpires = null;
+      await user.save();
+      return res.status(400).json({ message: 'Token has expired' });
+    }
+    user.password = newPassword;
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+    await user.save();
+    res.status(200).json({ message: 'Password reset successful' });
+
+  } catch (error) {
+    console.error('reset password error', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }

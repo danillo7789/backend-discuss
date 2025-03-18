@@ -1,8 +1,11 @@
 const express = require('express');
 const dotenv = require('dotenv');
+dotenv.config();
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const dbConnect = require('./config/dbConnect.js');
+const session = require("express-session");
+const passport = require('./utils/passport.js');
 // const { errorHandler } = require('./middleware/errorHandler.js');
 const User = require('./models/user.js');
 
@@ -10,7 +13,7 @@ const User = require('./models/user.js');
 const app = express();
 
 // Load environment variables
-dotenv.config();
+
 
 const corsObject = {
   origin: [process.env.LOCAL, process.env.LIVE],
@@ -34,6 +37,20 @@ dbConnect();
 
 // Set up CORS middleware
 app.use(cors(corsObject));
+
+//session
+app.use(
+  session({
+    secret: process.env.REFRESH_TOKEN_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+//initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 let onlineUsers = new Set();
 
@@ -106,11 +123,11 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//session
 
 //cron job
 
 //routes
+app.use('/auth', require('./routes/auth/socials.js'));
 app.use('/api/user', require('./routes/auth/auth.js'));
 
 //get routes
