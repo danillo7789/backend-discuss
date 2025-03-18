@@ -6,6 +6,7 @@ const cors = require('cors');
 const dbConnect = require('./config/dbConnect.js');
 const session = require("express-session");
 const passport = require('./utils/passport.js');
+const MongoStore = require('connect-mongo');
 // const { errorHandler } = require('./middleware/errorHandler.js');
 const User = require('./models/user.js');
 
@@ -44,6 +45,11 @@ app.use(
     secret: process.env.REFRESH_TOKEN_SECRET,
     resave: false,
     saveUninitialized: true,
+    store: MongoStore.create({
+      mongoUrl: process.env.CONNECTION_STRING, // MongoDB connection string
+      collectionName: 'sessions', // name of the collection to store sessions
+    }),
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }, // Session expiration 7 days
   })
 );
 
