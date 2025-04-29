@@ -1,5 +1,6 @@
 const Room = require('../models/room.js');
 const Users = require('../models/user.js');
+const logger = require('../utils/logger.js');
 
 exports.roomFeed = async (req, res) => {
   try {
@@ -17,7 +18,7 @@ exports.roomFeed = async (req, res) => {
 
     return res.status(200).json(roomsWithParticipantCount);
   } catch (error) {
-    console.log('error in roomFeedcontroller', error);
+    logger.error('Error occured while fetching rooms room', {error});
     return res.status(500).json({ message: 'Error occurred while fetching rooms' });
   }
 };

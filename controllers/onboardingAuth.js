@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { generateTokens, setTokens } = require('../utils/tokens.js');
 const { sendMail } = require('../utils/elasticMail.js');
+const logger = require('../utils/logger.js');
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -41,8 +42,8 @@ exports.registerUser = async (req, res) => {
         return res.status(400).json({ message: messages[0] });
       } else if (error.name === 'MongoNetworkError' || error.code === 'ETIMEOUT') {
         return res.status(503).json({ message: 'Service Unavailable. Please check your internet connection and try again.' });
-      } else {
-        console.log('Error occurred in registering user', error);
+      } else {        
+        logger.error('Error occurred in registering user', {error});
         return res.status(500).json({ message: 'Error occurred in registering user.' });
       }
     }
@@ -57,12 +58,12 @@ exports.loginUser = async (req, res) => {
     }
 
     const user = await User.findOne({ $or: [{ email: access }, { username: access }] });
-    if (!user) {
+    if (!user) {      
       return res.status(401).json({ message:  'Invalid login credentials'  });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (user && isMatch) {
+    const isMatch = await user.comparePassword(password);
+    if (isMatch) {
       const currentUser = {
         id: user.id,
         email: user.email,
@@ -73,13 +74,14 @@ exports.loginUser = async (req, res) => {
 
       return res.status(200).json({ token: accessToken })
     } else {
+      logger.error('Invalid login credentials.');
       return res.status(401).json({ message: 'Invalid login credentials' });
     }
   } catch (error) {
     if (error.name === 'MongoNetworkError' || error.code === 'ETIMEOUT') {
         return res.status(503).json({ message: 'Service Unavailable. Please check your internet connection and try again.' });
     } else {
-      console.log('There was an error logging the user in', error);
+      logger.error('Error occurred in logging user in', {error});     
       return res.status(500).json({ message:  'There was an error logging the user in'  });
     }
   }

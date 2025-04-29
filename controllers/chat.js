@@ -1,5 +1,6 @@
 const Room = require('../models/room.js');
 const Chat = require('../models/chat.js');
+const logger = require('../utils/logger.js');
 
 exports.postChat = async (req, res) => {
     try {
@@ -25,8 +26,8 @@ exports.postChat = async (req, res) => {
         await room.save();
         return res.status(201).json(chat);
 
-    } catch (error) {
-        console.log('Error occured sending chat', error);
+    } catch (error) {        
+        logger.error('Error occured sending chat', {error});
         return res.status(500).json({ message: 'Error occured sending chat' });
     }
 }
@@ -52,8 +53,8 @@ exports.getChats = async (req, res) => {
             updatedRoom
         });
 
-    } catch (error) {
-        console.log('Error occured getting room chats', error);
+    } catch (error) {        
+        logger.error('Error occured getting room chats', {error});
         return res.status(500).json({ message: 'Error getting room chats' });
     }
 }
@@ -73,8 +74,8 @@ exports.AllChats = async (req, res) => {
 
         return res.status(200).json(chats);
 
-    } catch (error) {
-        console.log('Error occured getting all chats for activity', error);
+    } catch (error) {        
+        logger.error('Error occured getting all chats for activity', {error});
         return res.status(500).json({ message: 'Error getting all chats activity' });
     }
 }
@@ -103,8 +104,8 @@ exports.deleteChat = async (req, res) => {
         await room.save();
 
         return res.status(200).json({ message: 'Chat deleted successfully', deleted: {_id: chatId} });
-    } catch (error) {
-        console.log('Error occurred deleting chat', error);
+    } catch (error) {        
+        logger.error('Error occurred in deleting chat', {error});
         return res.status(500).json({ message: 'Error occurred deleting chat' });
     }
 };

@@ -42,7 +42,7 @@ exports.topicFeed = async (req, res) => {
             topicsObject
         })
     } catch (error) {
-        console.log('Error occurred in topicComp', error);
+        logger.error('Error occured in topicComp', {error});
         return res.status(500).json({ message: 'Error occurred in topicComp.' });
     }
 }

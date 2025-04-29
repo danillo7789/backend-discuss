@@ -7,7 +7,7 @@ const userSchema = mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
+        unique: true, // implicitly creates an index
         validate(value) {
             if(!validator.isEmail(value)) {
                 throw new Error('Email is invalid')
@@ -46,21 +46,18 @@ userSchema.pre('save', async function(next){
     this.password = hashedPassword;
 });
 
-function generateRandomNumberToken(length) {
-    const bytes = crypto.randomBytes(length);
-    let token = '';
-  
-    for (let i = 0; i < bytes.length; i++) {
-      token += Math.floor(bytes[i] / 256 * 10);
-    }
-    //so the length is not more than specified length
-    return token.slice(0, length);
+userSchema.methods.comparePassword = async function(password) {
+    return await bcrypt.compare(password, this.password);
+}
+
+function generateRandomOnlyNumberToken(length) {
+    return Array.from({ length }, () => crypto.randomInt(0, 10)).join('');
   }
 
 // create a password token
 userSchema.methods.passwordReset = function resetPassword() {
-    this.passwordResetToken = generateRandomNumberToken(6);
+    this.passwordResetToken = generateRandomOnlyNumberToken(6);
     this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-  };
+};
 
 module.exports = mongoose.model('User', userSchema);

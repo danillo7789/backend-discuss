@@ -15,7 +15,7 @@ const {
 
 const loginRefreshLimitter = createRateLimiter(2, 10, 'login');
 
-router.post('/register', loginRefreshLimitter, registerUser);
+router.post('/register', registerUser);
 router.post('/login', loginRefreshLimitter, loginUser);
 router.get('/refresh', defaultLimiter, refresh);
 router.post('/logout', defaultLimiter, logout);

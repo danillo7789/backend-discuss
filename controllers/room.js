@@ -1,6 +1,7 @@
 const Room = require('../models/room.js');
 const Topic = require('../models/topic.js');
 const Chat = require('../models/chat.js');
+const logger = require('../utils/logger.js');
 
 exports.getRoom = async (req, res) => {
     try {
@@ -21,7 +22,7 @@ exports.getRoom = async (req, res) => {
 
         return res.status(200).json(roomWithTotalParticipantCount);
     } catch (error) {
-        console.log('Error occurred in fetching room', error);
+        logger.error('Error occured in fetching the room', {error});
         return res.status(500).json({ message: 'Error occurred in fetching room' });
     }
 }
@@ -53,7 +54,7 @@ exports.createRoom = async (req, res) => {
   
       return res.status(201).json(room);
     } catch (error) {
-      console.error('Error creating room:', error);
+        logger.error('Error creating room', {error});
       return res.status(500).json({ message: 'Error creating room' });
     }
 };
@@ -80,7 +81,7 @@ exports.updateRoom = async (req, res) => {
         await room.save();
         return res.status(200).json(room);
     } catch (error) {
-        console.error('Error updating room', error)
+        logger.error('Error updating room', {error});
         return res.status(500).json({ message: 'Error updating room' });
     }
 }
@@ -96,7 +97,7 @@ exports.deleteRoom = async (req, res) => {
 
         return res.status(200).json({ message: 'Room successfully deleted' });
     } catch (error) {
-        console.error('Error deleting room:', error);
+        logger.error('Error deleting room', {error});
         res.status(500).json({ message: 'Error deleting room' });
     }
 }

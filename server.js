@@ -42,7 +42,7 @@ app.use(cors(corsObject));
 //session
 app.use(
   session({
-    secret: process.env.REFRESH_TOKEN_SECRET,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     store: MongoStore.create({
@@ -142,6 +142,7 @@ app.use('/api/get', require('./routes/get/roomFeed.js'));
 app.use('/api/get', require('./routes/get/room.js'));
 app.use('/api/get', require('./routes/get/getChats.js'));
 app.use('/api/get', require('./routes/get/getUser.js'));
+app.use('/api/get', require('./routes/get/ping.js'));
 
 //postroutes
 app.use('/api', require('./routes/send/postChat.js'));
@@ -150,6 +151,7 @@ app.use('/api', require('./routes/send/deleteRoom.js'));
 app.use('/api', require('./routes/send/deleteChat.js'));
 app.use('/api', require('./routes/send/updateRoom.js'));
 app.use('/api', require('./routes/send/profileUpdate.js'));
+app.use('/api/saas', require('./routes/testSaaS.js'));
 
 // error handler
 // app.use(errorHandler);
