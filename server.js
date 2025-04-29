@@ -151,7 +151,7 @@ app.use('/api', require('./routes/send/deleteRoom.js'));
 app.use('/api', require('./routes/send/deleteChat.js'));
 app.use('/api', require('./routes/send/updateRoom.js'));
 app.use('/api', require('./routes/send/profileUpdate.js'));
-app.use('/api/saas', require('./routes/testSaaS.js'));
+// app.use('/api/saas', require('./routes/testSaaS.js'));
 
 // error handler
 // app.use(errorHandler);

@@ -1,5 +1,5 @@
 const express = require('express');
-const { createAndUpdate, batchSyncStudents } = require('../controllers/testSaas');
+// const { createAndUpdate, batchSyncStudents } = require('../controllers/testSaas');
 const router = express.Router();
 
 router.post('/create-student', createAndUpdate);
