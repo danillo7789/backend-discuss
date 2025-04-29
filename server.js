@@ -15,6 +15,7 @@ const app = express();
 
 // Load environment variables
 
+app.set('trust proxy', 1); // essential for correct IP detection in tools like express-rate-limit
 
 const corsObject = {
   origin: [process.env.LOCAL, process.env.LIVE],
