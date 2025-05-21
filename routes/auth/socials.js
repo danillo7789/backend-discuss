@@ -19,7 +19,8 @@ router.get(
     }
     const { accessToken, refreshToken } = generateTokens(payload, req.user._id);
     setTokens(res, accessToken, refreshToken);    
-    res.redirect('https://diskors.netlify.app'); //vite react dev homepage
+    // res.redirect('https://diskors.netlify.app'); //vite react dev homepage
+    res.redirect('https://diskors-frontend.onrender.com'); //vite react dev homepage
   }
 );
 
