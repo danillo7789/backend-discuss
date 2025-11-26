@@ -170,18 +170,10 @@ exports.logout = async (req, res) => {
   try {
     const cookies = req.cookies;
     if (!cookies?.jwt) return res.sendStatus(204);
-    res.clearCookie('jwt', {
-      httpOnly: true,
-      sameSite: isDevelopment ? 'lax' : 'none',
-      secure: isDevelopment ? false : true
-    });
-    res.clearCookie('accesstoken', {
-      httpOnly: true,
-      sameSite: isDevelopment ? 'lax' : 'none',
-      secure: isDevelopment ? false : true
-    });
+    res.clearCookie('jwt');
+    res.clearCookie('accesstoken');
     res.json({ message: 'Logged out' });
-    
+    return;
   } catch (error) {
     console.error('error clearing cookie', error)
   }
