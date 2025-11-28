@@ -20,15 +20,10 @@ app.set('trust proxy', 1); // essential for correct IP detection in tools like e
 const corsObject = {
   origin: process.env.LIVE,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   exposedHeaders: ['set-cookie'] // Important for iOS
 }
-
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  next();
-});
 
 // For Socket.IO
 const http = require('http');
@@ -46,6 +41,20 @@ dbConnect();
 
 // Set up CORS middleware
 app.use(cors(corsObject));
+
+// Add this middleware specifically for iOS
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Origin", req.headers.origin); // Dynamic origin
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  
+  // For preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
 //session
 app.use(
