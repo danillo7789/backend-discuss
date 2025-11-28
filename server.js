@@ -17,12 +17,21 @@ const app = express();
 
 app.set('trust proxy', 1); // essential for correct IP detection in tools like express-rate-limit
 
+const allowedOrigins = [process.env.LOCAL, process.env.LIVE];
+
 const corsObject = {
-  origin: [process.env.LOCAL, process.env.LIVE],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-  credentials: true,
-}
+    origin: function (origin, callback) {
+      //!origin, because postman and some servers may not send origin header
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  }
 
 // For Socket.IO
 const http = require('http');
