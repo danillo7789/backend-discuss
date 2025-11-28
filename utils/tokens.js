@@ -23,6 +23,7 @@ const setTokens = (res, token, refreshToken) => {
     secure: isDevelopment ? false : true, // https
     sameSite: isDevelopment ? 'lax' : 'none',
     path: '/',
+    domain: process.env.DOMAIN,
     maxAge: 15 * 60 * 1000,
   });
 
@@ -31,6 +32,7 @@ const setTokens = (res, token, refreshToken) => {
     secure: isDevelopment ? false : true, // https
     sameSite: isDevelopment ? 'lax' : 'none',
     path: '/',
+    domain: process.env.DOMAIN,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
