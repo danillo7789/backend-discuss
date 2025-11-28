@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const generateTokens = (currentUser, userId) => {
   const accessToken = jwt.sign(
@@ -20,19 +20,17 @@ const generateTokens = (currentUser, userId) => {
 const setTokens = (res, token, refreshToken) => {
   res.cookie('accesstoken', token, {
     httpOnly: true, //not accessible by clientside js
-    secure: isDevelopment ? false : true, // https
-    sameSite: isDevelopment ? 'lax' : 'none',
-    path: '/',
-    domain: process.env.DOMAIN,
+    secure: isProduction, // https
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',    
     maxAge: 15 * 60 * 1000,
   });
 
   res.cookie('jwt', refreshToken, {
     httpOnly: true, //not accessible by clientside js
-    secure: isDevelopment ? false : true, // https
-    sameSite: isDevelopment ? 'lax' : 'none',
-    path: '/',
-    domain: process.env.DOMAIN,
+    secure: isProduction, // https
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',    
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };

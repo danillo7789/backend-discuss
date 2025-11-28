@@ -22,6 +22,7 @@ const corsObject = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
   credentials: true,
+  exposedHeaders: ['set-cookie'] // Important for iOS
 }
 
 app.use((req, res, next) => {
